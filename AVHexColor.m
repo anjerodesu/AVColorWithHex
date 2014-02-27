@@ -36,7 +36,7 @@
 + (AVColor *)colorWithHex:(UInt32)hexadecimal
 {
 	CGFloat red, green, blue, alpha = 1.0f;
-	NSString *hexString = [NSString stringWithFormat: @"%lX" , (unsigned long)hexadecimal];
+	NSString *hexString = [NSString stringWithFormat: @"%lx" , (unsigned long)hexadecimal];
 	
 	if ( hexString.length == 3 )
 	{
@@ -96,22 +96,48 @@
 + (AVColor *)colorWithHexString:(NSString *)hexadecimal
 {
 	// convert Objective-C NSString to C string
-	const char *cString = [hexadecimal cStringUsingEncoding: NSASCIIStringEncoding];
-	long long int hex;
-	
-	// if the string contains hash tag (#) then remove
-	// hash tag and convert the C string to a base-16 int
-	if ( cString[0] == '#' )
-	{
-		hex = strtoll( cString + 1 , NULL , 16 );
-	}
-	else
-	{
-		hex = strtoll( cString , NULL , 16 );
-	}
-	
-	AVColor *color = [self colorWithHex: (UInt32)hex];
-	return color;
+    NSString *_hexadesimal = hexadecimal;
+    // remove '#' prefix
+    if([hexadecimal characterAtIndex:0] == '#'){
+        _hexadesimal = [hexadecimal substringFromIndex:1];
+    }
+    // 1 => 111111
+    if (_hexadesimal.length == 1) {
+        _hexadesimal = [NSString stringWithFormat:@"%@%@%@%@%@%@",_hexadesimal,_hexadesimal,_hexadesimal,_hexadesimal,_hexadesimal,_hexadesimal];
+    }
+    // 333 or 333333
+    if (_hexadesimal.length == 3) {
+        _hexadesimal = [NSString stringWithFormat:@"%@%@",_hexadesimal,_hexadesimal];
+    }
+    // get rgba components
+    const char *hex;
+    unsigned long red, green, blue, alpha;
+    for (unsigned int i = 0, max = (_hexadesimal.length == 8) ? 4 : 3; i < max; i++) {
+        hex =[[_hexadesimal substringWithRange:NSMakeRange(i, 2)] cStringUsingEncoding:NSASCIIStringEncoding];
+        switch (i) {
+            case 0:
+                red = strtol(hex, NULL, 16);
+                break;
+            case 1:
+                green = strtol(hex, NULL, 16);
+                break;
+            case 2:
+                blue = strtol(hex, NULL, 16);
+                break;
+            case 3:
+                alpha = strtol(hex, NULL, 16);
+                break;
+            default:
+                break;
+        }
+    }
+    AVColor *color = nil;
+    if (_hexadesimal.length == 8) {
+        color = [AVColor colorWithRed:(CGFloat)red/255.0f green:(CGFloat)green/255.0f blue:(CGFloat)blue/255.0f alpha:(CGFloat)alpha/255.0f];
+    }else if(_hexadesimal.length == 6){
+        color = [AVColor colorWithRed:(CGFloat)red/255.0f green:(CGFloat)green/255.0f blue:(CGFloat)blue/255.0f alpha:1.0f];
+    }
+    return color;
 }
 
 + (NSString *)hexStringFromColor:(AVColor *)color

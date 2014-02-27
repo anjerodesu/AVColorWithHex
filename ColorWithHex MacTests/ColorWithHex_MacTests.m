@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-
+#import "AVHexColor.h"
 @interface ColorWithHex_MacTests : XCTestCase
 
 @end
@@ -26,9 +26,19 @@
     [super tearDown];
 }
 
+#define TEST_COLOR(hex) c = [AVHexColor colorWithHexString:hex]; XCTAssert(c, ); NSLog(@"%@",c);
 - (void)testExample
 {
-    XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
+    AVColor *c;
+    // rgb
+    TEST_COLOR(@"#fff");
+    TEST_COLOR(@"000");
+    TEST_COLOR(@"ff0000");
+    TEST_COLOR(@"#0000ff");
+    TEST_COLOR(@"#ee8899");
+    /// rgba
+    TEST_COLOR(@"#ff00ffff")
+    TEST_COLOR(@"00000000")
 }
 
 @end
